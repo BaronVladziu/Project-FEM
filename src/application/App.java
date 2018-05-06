@@ -1,9 +1,11 @@
 package application;
 
-public class App {
+import java.awt.*;
+
+class App {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        EventQueue.invokeLater(Window::new);
     }
 
 }
