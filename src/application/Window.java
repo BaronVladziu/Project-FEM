@@ -12,9 +12,8 @@ class Window extends JFrame implements ActionListener {
     private final DrawPanel _picturePanel = new DrawPanel();
     private final UIPanel _uiPanel = new UIPanel();
 
-
-    Window() {
-        super("Random-Melodies-Generator");
+    public Window() {
+        super("Project-FEM");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
         add(_picturePanel);
