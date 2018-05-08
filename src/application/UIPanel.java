@@ -47,9 +47,9 @@ class UIPanel extends JComponent {
 
     public DrawingPlaneSettings getPlaneSettings() {
         DrawingPlaneSettings settings = new DrawingPlaneSettings();
-        settings.planeX = Integer.parseInt(_planeXPanel.getInput());
-        settings.planeY = Integer.parseInt(_planeYPanel.getInput());
-        settings.tileSize = Integer.parseInt(_tileXPanel.getInput());
+        settings.planeX = Float.parseFloat(_planeXPanel.getInput());
+        settings.planeY = Float.parseFloat(_planeYPanel.getInput());
+        settings.tileSize = Float.parseFloat(_tileXPanel.getInput());
         return settings;
     }
 
