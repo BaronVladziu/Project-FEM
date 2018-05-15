@@ -117,4 +117,25 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
         this.repaint();
     }
 
+    public E_TileType getTileType(int x, int y) {
+        if (x >= 0 && x < _NOTilesx && y >= 0 && y < _NOTilesy) {
+            Color tileColor = _tiles[x][y].getColor();
+            if (tileColor == AIR_COLOR) {
+                return E_TileType.Air;
+            } else if (tileColor == WALL_COLOR) {
+                return E_TileType.Wall;
+            }
+            throw new TileTypeError("Unknown tile type!");
+        }
+        return E_TileType.Void;
+    }
+
+    public int getNOTilesX() {
+        return _NOTilesx;
+    }
+
+    public int getNOTilesY() {
+        return _NOTilesy;
+    }
+
 }

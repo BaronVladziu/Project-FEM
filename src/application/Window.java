@@ -12,7 +12,7 @@ import java.awt.event.ActionListener;
 class Window extends JFrame implements ActionListener {
 
     private final DrawingSheet _drawPanel = new DrawingSheet();
-    private final Solver _solver = new Solver();
+    private final Solver _solver = new Solver(_drawPanel);
     private final UIPanel _uiPanel = new UIPanel(this, _solver);
 
     public Window() {

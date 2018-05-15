@@ -44,6 +44,7 @@ public class Matrix {
     }
 
     void solve() throws MatrixException {
+        //Gaussian method
         if (!isEasilySolvable()) {
             throw new MatrixException("Matrix not easily solvable!");
         }
@@ -93,6 +94,14 @@ public class Matrix {
         for (int j = 0; j < _sizeY; j++) {
             _table[posX][j] *= factor;
         }
+    }
+
+    int getSizeX() {
+        return _sizeX;
+    }
+
+    int getSizeY() {
+        return _sizeY;
     }
 
 }
