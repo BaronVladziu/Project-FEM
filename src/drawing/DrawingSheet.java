@@ -87,19 +87,13 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
     }
 
     @Override
-    public void mouseReleased(MouseEvent event) {
-        System.out.println("Released");
-    }
+    public void mouseReleased(MouseEvent event) {}
 
     @Override
-    public void mouseEntered(MouseEvent event) {
-        System.out.println("Entered");
-    }
+    public void mouseEntered(MouseEvent event) {}
 
     @Override
-    public void mouseExited(MouseEvent event) {
-        System.out.println("Exited");
-    }
+    public void mouseExited(MouseEvent event) {}
 
     public void generatePlane(float planeX, float planeY, float tileSize) {
         _tileSize = tileSize;

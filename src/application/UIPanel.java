@@ -1,6 +1,7 @@
 package application;
 
 import drawing.DrawingPlaneSettings;
+import solver.Solver;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,8 +17,9 @@ class UIPanel extends JComponent {
     private final SettingInputPanel _planeYPanel = new SettingInputPanel("Plane width [m]:", "4");
     private final SettingInputPanel _tileXPanel = new SettingInputPanel("Tile length [m]:", "1");
     private final JButton _generatePlaneButton = new JButton("Generate plane");
+    private final JButton _solveButton = new JButton("Solve");
 
-    UIPanel(Window window) {
+    UIPanel(Window window, Solver solver) {
         JComponent _comp1 = new JPanel();
         _comp1.setPreferredSize(new Dimension(_NAME_LENGTH + _GAP_LENGTH + _INPUT_LENGTH,
                 3 * (_BAR_HEIGHT + _GAP_LENGTH)));
@@ -29,13 +31,17 @@ class UIPanel extends JComponent {
         _comp1.setVisible(true);
         _generatePlaneButton.addActionListener(window);
         _generatePlaneButton.setPreferredSize(new Dimension(_comp1.getPreferredSize().width,
-                (900 - _comp1.getPreferredSize().height - 2*_GAP_LENGTH)/2));
+                (900 - _comp1.getPreferredSize().height - 2*_GAP_LENGTH)/4));
+        _solveButton.addActionListener(solver);
+        _solveButton.setPreferredSize(new Dimension(_comp1.getPreferredSize().width,
+                (900 - _comp1.getPreferredSize().height - 2*_GAP_LENGTH)/4));
         JComponent _comp3 = new JPanel();
         _comp3.setPreferredSize(new Dimension(_comp1.getPreferredSize().width,
                 900));
         _comp3.setLayout(new FlowLayout());
         _comp3.add(_comp1);
         _comp3.add(_generatePlaneButton);
+        _comp3.add(_solveButton);
         _comp3.setVisible(true);
 
         setPreferredSize(new Dimension( _comp3.getPreferredSize().width + _GAP_LENGTH,

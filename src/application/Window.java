@@ -2,6 +2,7 @@ package application;
 
 import drawing.DrawingPlaneSettings;
 import drawing.DrawingSheet;
+import solver.Solver;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +12,8 @@ import java.awt.event.ActionListener;
 class Window extends JFrame implements ActionListener {
 
     private final DrawingSheet _drawPanel = new DrawingSheet();
-    private final UIPanel _uiPanel = new UIPanel(this);
+    private final Solver _solver = new Solver();
+    private final UIPanel _uiPanel = new UIPanel(this, _solver);
 
     public Window() {
         super("Project-FEM");
