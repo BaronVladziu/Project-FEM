@@ -4,26 +4,44 @@ import drawing.DrawingSheet;
 import drawing.E_TileType;
 import drawing.TileTypeError;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-public class Solver implements ActionListener {
+public class Solver {
 
     private final DrawingSheet _drawingSheet;
 
     private Matrix _realMatrix;
     private Matrix _imaginaryMatrix;
     private int _n;
+    private double _c;
+    private double _w;
+    private double _k;
+    private double _d;
+    private double _alpha;
 
     public Solver(DrawingSheet drawingSheet) {
         _drawingSheet = drawingSheet;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent event) {
+    public void solve(SimulationSettings settings) {
+        updateConstants(settings);
         createMatrices();
         _realMatrix.print();
         _imaginaryMatrix.print();
+        try {
+            _realMatrix.solve();
+            _imaginaryMatrix.solve();
+        } catch (MatrixException e) {
+            System.out.println(e.getMessage());
+        }
+        _realMatrix.print();
+        _imaginaryMatrix.print();
+    }
+
+    private void  updateConstants(SimulationSettings settings) {
+        _c = settings._c;
+        _w = settings._f * 2 * Math.PI;
+        _k = _w/_c;
+        _d = settings._d;
+        _alpha = _d*_d*_k*_k - 4;
     }
 
     private void createMatrices() {
@@ -52,12 +70,88 @@ public class Solver implements ActionListener {
                     setSource(i, j);
                 } else if (counters[1] + counters[2] == 4) {
                     setZero(i, j);
-                } else if (counters[2] != 0) {
-                    //TODO: Borders
-                } else if (counters[1] != 0) {
-                    //TODO: Walls
+                } else if (counters[2] == 2) {
+                    if (nw == E_TileType.Void) {
+                        if (ne == E_TileType.Void) {
+                            setBorder(i, j, E_Direction8.N);
+                        } else {
+                            setBorder(i, j, E_Direction8.W);
+                        }
+                    } else {
+                        if (ne == E_TileType.Void) {
+                            setBorder(i, j, E_Direction8.E);
+                        } else {
+                            setBorder(i, j, E_Direction8.S);
+                        }
+                    }
+                } else if (counters[2] == 3) {
+                    if (nw != E_TileType.Void) {
+                        setBorder(i, j, E_Direction8.SE);
+                    } else if (ne != E_TileType.Void) {
+                        setBorder(i, j, E_Direction8.SW);
+                    } else if (se != E_TileType.Void) {
+                        setBorder(i, j, E_Direction8.NW);
+                    } else {
+                        setBorder(i, j, E_Direction8.NE);
+                    }
                 } else {
-                    setFunction(i, j);
+                    if (nw != E_TileType.Wall) {
+                        if (ne != E_TileType.Wall) {
+                            if (sw != E_TileType.Wall) {
+                                if (se != E_TileType.Wall) {    //0000
+                                    setFunction(i, j);
+                                } else {                        //0001
+                                    setWall(i, j, E_Direction8.SE);
+                                }
+                            } else {
+                                if (se != E_TileType.Wall) {    //0010
+                                    setWall(i, j, E_Direction8.SW);
+                                } else {                        //0011
+                                    setWall(i, j, E_Direction8.S);
+                                }
+                            }
+                        } else {
+                            if (sw != E_TileType.Wall) {
+                                if (se != E_TileType.Wall) {    //0100
+                                    setWall(i, j, E_Direction8.NE);
+                                } else {                        //0101
+                                    setWall(i, j, E_Direction8.E);
+                                }
+                            } else {
+                                if (se != E_TileType.Wall) {    //0110
+                                    setFunction(i, j);
+                                } else {                        //0111
+                                    setWall(i, j, E_Direction8.SE);
+                                }
+                            }
+                        }
+                    } else {
+                        if (ne != E_TileType.Wall) {
+                            if (sw != E_TileType.Wall) {
+                                if (se != E_TileType.Wall) {    //1000
+                                    setWall(i, j, E_Direction8.NW);
+                                } else {                        //1001
+                                    setFunction(i, j);
+                                }
+                            } else {
+                                if (se != E_TileType.Wall) {    //1010
+                                    setWall(i, j, E_Direction8.W);
+                                } else {                        //1011
+                                    setWall(i, j, E_Direction8.SW);
+                                }
+                            }
+                        } else {
+                            if (sw != E_TileType.Wall) {
+                                if (se != E_TileType.Wall) {    //1100
+                                    setWall(i, j, E_Direction8.N);
+                                } else {                        //1101
+                                    setWall(i, j, E_Direction8.NE);
+                                }
+                            } else {                            //1110
+                                setWall(i, j, E_Direction8.NW);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -85,23 +179,112 @@ public class Solver implements ActionListener {
     }
 
     private void setSource(int x, int y) {
-        //TODO
+        int k = countK(x, y);
+        _realMatrix.set(k, k, 1);
+        _realMatrix.set(_realMatrix.getSizeX() - 1, k, 1);
+        _imaginaryMatrix.set(k, k, 1);
     }
 
     private void setFunction(int x, int y) {
-        //TODO
+        int k = countK(x, y);
+        _realMatrix.set(k, k, _alpha);
+        _imaginaryMatrix.set(k, k, _alpha);
+        int l = countK(x-1, y);
+        _realMatrix.set(l, k, 1);
+        _imaginaryMatrix.set(l, k, 1);
+        l = countK(x+1, y);
+        _realMatrix.set(l, k, 1);
+        _imaginaryMatrix.set(l, k, 1);
+        l = countK(x, y-1);
+        _realMatrix.set(l, k, 1);
+        _imaginaryMatrix.set(l, k, 1);
+        l = countK(x, y+1);
+        _realMatrix.set(l, k, 1);
+        _imaginaryMatrix.set(l, k, 1);
     }
 
     private void setWall(int x, int y, E_Direction8 dir) {
-        //TODO
+        int k = countK(x, y);
+        switch (dir) {
+            case E: {
+                _realMatrix.set(k, k, 1/_d);
+                _imaginaryMatrix.set(k, k, 1/_d);
+                int l = countK(x-1, y);
+                _realMatrix.set(l, k, -1/_d);
+                _imaginaryMatrix.set(l, k, -1/_d);
+                break;
+            }
+            case NE: {
+                _realMatrix.set(k, k, 1/_d);
+                _imaginaryMatrix.set(k, k, 1/_d);
+                int l = countK(x-1, y+1);
+                _realMatrix.set(l, k, -1/(Math.sqrt(2)*_d));
+                _imaginaryMatrix.set(l, k, -1/(Math.sqrt(2)*_d));
+                break;
+            }
+            case NW: {
+                _realMatrix.set(k, k, -1/_d);
+                _imaginaryMatrix.set(k, k, -1/_d);
+                int l = countK(x+1, y+1);
+                _realMatrix.set(l, k, 1/(Math.sqrt(2)*_d));
+                _imaginaryMatrix.set(l, k, 1/(Math.sqrt(2)*_d));
+                break;
+            }
+            case SE: {
+                _realMatrix.set(k, k, 1/_d);
+                _imaginaryMatrix.set(k, k, 1/_d);
+                int l = countK(x-1, y-1);
+                _realMatrix.set(l, k, -1/(Math.sqrt(2)*_d));
+                _imaginaryMatrix.set(l, k, -1/(Math.sqrt(2)*_d));
+                break;
+            }
+            case SW: {
+                _realMatrix.set(k, k, -1/_d);
+                _imaginaryMatrix.set(k, k, -1/_d);
+                int l = countK(x+1, y-1);
+                _realMatrix.set(l, k, 1/(Math.sqrt(2)*_d));
+                _imaginaryMatrix.set(l, k, 1/(Math.sqrt(2)*_d));
+                break;
+            }
+            case N: {
+                _realMatrix.set(k, k, -1/_d);
+                _imaginaryMatrix.set(k, k, -1/_d);
+                int l = countK(x, y+1);
+                _realMatrix.set(l, k, 1/_d);
+                _imaginaryMatrix.set(l, k, 1/_d);
+                break;
+            }
+            case S: {
+                _realMatrix.set(k, k, 1/_d);
+                _imaginaryMatrix.set(k, k, 1/_d);
+                int l = countK(x, y-1);
+                _realMatrix.set(l, k, -1/_d);
+                _imaginaryMatrix.set(l, k, -1/_d);
+                break;
+            }
+            case W: {
+                _realMatrix.set(k, k, -1/_d);
+                _imaginaryMatrix.set(k, k, -1/_d);
+                int l = countK(x+1, y);
+                _realMatrix.set(l, k, 1/_d);
+                _imaginaryMatrix.set(l, k, 1/_d);
+                break;
+            }
+        }
     }
 
     private void setBorder(int x, int y, E_Direction8 dir) {
-        //TODO
+        setZero(x, y); //TODO
     }
 
     private void setZero(int x, int y) {
-        //TODO
+        int k = countK(x, y);
+        _realMatrix.set(k, k, 1);
+        _imaginaryMatrix.set(k, k, 1);
+    }
+
+    private int countK(int x, int y) {
+        return y*(_drawingSheet.getNOTilesX() + 1) + x;
     }
 
 }
