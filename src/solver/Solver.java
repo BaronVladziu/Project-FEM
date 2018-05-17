@@ -14,6 +14,8 @@ public class Solver {
     private double _c;
     private double _w;
     private double _k;
+    private double _mapD;
+    private int _r;
     private double _d;
     private double _alpha;
 
@@ -24,40 +26,49 @@ public class Solver {
     public void solve(SimulationSettings settings) {
         updateConstants(settings);
         createMatrices();
-        _realMatrix.print();
-        _imaginaryMatrix.print();
         try {
             _realMatrix.solve();
             _imaginaryMatrix.solve();
         } catch (MatrixException e) {
             System.out.println(e.getMessage());
         }
-        _realMatrix.print();
-        _imaginaryMatrix.print();
+        scaleValues();
+        setValueColors();
     }
 
     private void  updateConstants(SimulationSettings settings) {
         _c = settings._c;
         _w = settings._f * 2 * Math.PI;
         _k = _w/_c;
-        _d = settings._d;
+        _mapD = settings._d;
+        double d = _c/(6*settings._f);
+        _r = (int)(_mapD / d) + 1;
+        _d = _mapD / _r;
         _alpha = _d*_d*_k*_k - 4;
     }
 
     private void createMatrices() {
-        _n = (_drawingSheet.getNOTilesX() + 1) * (_drawingSheet.getNOTilesY() + 1);
+        _n = (_drawingSheet.getNOTilesX()*_r + 1) * (_drawingSheet.getNOTilesY()*_r + 1);
         _realMatrix = new Matrix(_n + 1, _n);
         _imaginaryMatrix = new Matrix(_n + 1, _n);
         E_TileType ne, se, sw, nw;
         int counters[] = new int[3]; //SOURCES, WALLS, VOIDS
-        for (int i = 0; i <= _drawingSheet.getNOTilesX(); i++) {
-            se = _drawingSheet.getTileType(i, -1);
-            sw = _drawingSheet.getTileType(i - 1, -1);
-            for (int j = 0; j <= _drawingSheet.getNOTilesY(); j++) {
+        for (int i = 0; i <= _drawingSheet.getNOTilesX()*_r; i++) {
+            se = _drawingSheet.getTileType(i/_r, -1);
+            if (i == 0) {
+                sw = _drawingSheet.getTileType(-1, -1);
+            } else {
+                sw = _drawingSheet.getTileType((i - 1) / _r, -1);
+            }
+            for (int j = 0; j <= _drawingSheet.getNOTilesY()*_r; j++) {
                 ne = se;
                 nw = sw;
-                se = _drawingSheet.getTileType(i, j);
-                sw = _drawingSheet.getTileType(i - 1, j);
+                se = _drawingSheet.getTileType(i/_r, j/_r);
+                if (i == 0) {
+                    sw = _drawingSheet.getTileType(-1, j / _r);
+                } else {
+                    sw = _drawingSheet.getTileType((i - 1) / _r, j / _r);
+                }
                 counters[0] = 0;
                 counters[1] = 0;
                 counters[2] = 0;
@@ -65,7 +76,7 @@ public class Solver {
                 countTileTypes(nw, counters);
                 countTileTypes(sw, counters);
                 countTileTypes(se, counters);
-                System.out.println(Integer.toString(counters[0]) + " \t" + Integer.toString(counters[1]) + " \t" + Integer.toString(counters[2]));
+                System.out.println(Integer.toString(counters[0]) + " - " + Integer.toString(counters[1]) + " - " + Integer.toString(counters[2]));
                 if (counters[0] != 0) {
                     setSource(i, j);
                 } else if (counters[1] + counters[2] == 4) {
@@ -284,7 +295,24 @@ public class Solver {
     }
 
     private int countK(int x, int y) {
-        return y*(_drawingSheet.getNOTilesX() + 1) + x;
+        return y*(_drawingSheet.getNOTilesX()*_r + 1) + x;
+    }
+
+    private void scaleValues() {
+        double max = _realMatrix.getMaxAbsValue();
+        _realMatrix.scaleY(_n, 1/max);
+    }
+
+    private void setValueColors() {
+        _drawingSheet.setTileSplit(_r);
+        for (int i = 0; i < _drawingSheet.getNOTilesX()*_r; i++) {
+            for (int j = 0; j < _drawingSheet.getNOTilesY()*_r; j++) {
+                _drawingSheet.setValueColor(i/_r, j/_r, i%_r, j%_r,
+                        _realMatrix.get(_n, countK(i, j)), _realMatrix.get(_n, countK(i+1, j)),
+                        _realMatrix.get(_n, countK(i, j+1)), _realMatrix.get(_n, countK(i+1, j+1)));
+            }
+        }
+        _drawingSheet.switchToValueDraw();
     }
 
 }

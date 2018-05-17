@@ -90,7 +90,7 @@ public class Matrix {
         }
     }
 
-    private void scaleY(int posX, double factor) {
+    void scaleY(int posX, double factor) {
         for (int j = 0; j < _sizeY; j++) {
             _table[posX][j] *= factor;
         }
@@ -102,6 +102,18 @@ public class Matrix {
 
     int getSizeY() {
         return _sizeY;
+    }
+
+    double getMaxAbsValue() {
+        double max = 0;
+        double a;
+        for (int j = 0; j < _sizeY; j++) {
+            a = Math.abs(_table[_sizeX - 1][j]);
+            if (a > max) {
+                max = a;
+            }
+        }
+        return max;
     }
 
 }

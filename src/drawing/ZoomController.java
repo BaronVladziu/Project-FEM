@@ -21,19 +21,20 @@ public class ZoomController implements MouseWheelListener {
         } else {
             zoomIn();
         }
-        _sheet.redrawTiles();
     }
 
     float getZoom() {
         return _zoom;
     }
 
-    private void zoomIn() {
+    void zoomIn() {
         _zoom *= _ZOOMING_SPEED;
+        _sheet.redrawTiles();
     }
 
-    private void zoomOut() {
+    void zoomOut() {
         _zoom /= _ZOOMING_SPEED;
+        _sheet.redrawTiles();
     }
 
 }

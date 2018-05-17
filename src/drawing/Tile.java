@@ -1,44 +1,78 @@
 package drawing;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 
-class Tile extends Rectangle2D.Float {
+class Tile {
 
-    private Color _fillColor;
-    private float _posx;
-    private float _posy;
-    private float _size;
+    private SubTile _fillTile;
+    private SubTile[][] _valueTilesTable;
+    private E_TileType _type;
+    private int _split;
+    private float _subSize;
 
-    Tile(float posx, float posy, float size, Color startColor) {
-        super(posx, posy, size, size);
-        _posx = posx;
-        _posy = posy;
-        _size = size;
-        _fillColor = startColor;
+    Tile(float posx, float posy, float size, E_TileType type, Color startColor) {
+        _fillTile = new SubTile(posx, posy, size, startColor);
+        _type = type;
     }
 
     void setTranslation(int x, int y, float zoom) {
-        super.x = (_posx * zoom) + x;
-        super.y = (_posy * zoom) + y;
-        super.width = _size * zoom;
-        super.height = _size * zoom;
+        _fillTile.setTranslation(x, y, zoom);
+        if (_valueTilesTable != null) {
+            for (int i = 0; i < _split; i++) {
+                for (int j = 0; j < _split; j++) {
+                    _valueTilesTable[i][j].setTranslation(x, y, zoom);
+                }
+            }
+        }
     }
 
-    Color getColor() {
-        return _fillColor;
+    SubTile getFillSubTile() {
+        return _fillTile;
     }
 
-    void setColor(Color color) {
-        _fillColor = color;
+    SubTile getValueSubTile(int x, int y) {
+        return _valueTilesTable[x][y];
+    }
+
+    void setType(E_TileType type, Color color) {
+        _type = type;
+        _fillTile.setColor(color);
+    }
+
+    void createValueTable(int split) {
+        _split = split;
+        _valueTilesTable = new SubTile[_split][_split];
+        _subSize = _fillTile.getSize()/_split;
+        for (int i = 0; i < _split; i++) {
+            for (int j = 0; j < _split; j++) {
+                _valueTilesTable[i][j] = new SubTile(_fillTile.getPosX() + i*_subSize,
+                        _fillTile.getPosY() + j*_subSize, _subSize, _fillTile.getColor());
+            }
+        }
+    }
+
+    int getSplit() {
+        return _split;
+    }
+
+    void setColor(int x, int y, double nw, double ne, double sw, double se) {
+        _valueTilesTable[x][y].setColor(nw, ne, sw, se);
+    }
+
+    double sigmoid(double x) {
+        return (2/( 1 + Math.pow(Math.E,(-1*x))) - 1);
     }
 
     float getPosX() {
-        return _posx;
+        return _fillTile.getPosX();
     }
 
     float getPosY() {
-        return _posy;
+        return _fillTile.getPosY();
+    }
+
+    E_TileType getType() {
+        return _type;
     }
 
 }
