@@ -3,6 +3,7 @@ package drawing;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Point2D;
 
 public class DrawingSheet extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
 
@@ -42,20 +43,49 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
                     for (int x = 0; x < _tiles[i][j].getSplit(); x++) {
                         for (int y = 0; y < _tiles[i][j].getSplit(); y++) {
                             subtile = _tiles[i][j].getValueSubTile(x, y);
-                            g2d.setColor(subtile.getColor());
-                            g2d.fill(subtile);
-                            g2d.draw(subtile);
+                            int size = (int)(subtile.getSize() * 100);
+                            int posX = (int)(subtile.getPosX() * 100);
+                            int posY = (int)(subtile.getPosY() * 100);
+                            for (int v1 = 0; v1 < size; v1++) {
+                                for (int v2 = 0; v2 < size; v2++) {
+                                    g2d.setColor(mixColors(subtile.getColors(), v1, v2, size));
+                                    g2d.fillRect(posX + v1, posY + v2, 1, 1);
+                                }
+                            }
                         }
                     }
                 } else {
                     subtile = _tiles[i][j].getFillSubTile();
-                    g2d.setColor(subtile.getColor());
+                    g2d.setColor(subtile.getColor(0));
                     g2d.fill(subtile);
                     g2d.setColor(OUTLINE_COLOR);
                     g2d.draw(subtile);
                 }
             }
         }
+    }
+
+    private Color mixColors(Color[] colors, int x, int y, int size) {
+        int r = 0;
+        int g = 0;
+        int b = 0;
+        r += colors[0].getRed()*colorFadeFunction(size, x, y);
+        r += colors[1].getRed()*colorFadeFunction(size, size - x, y);
+        r += colors[2].getRed()*colorFadeFunction(size, x, size - y);
+        r += colors[3].getRed()*colorFadeFunction(size, size - x, size - y);
+        g += colors[0].getGreen()*colorFadeFunction(size, x, y);
+        g += colors[1].getGreen()*colorFadeFunction(size, size - x, y);
+        g += colors[2].getGreen()*colorFadeFunction(size, x, size - y);
+        g += colors[3].getGreen()*colorFadeFunction(size, size - x, size - y);
+        b += colors[0].getBlue()*colorFadeFunction(size, x, y);
+        b += colors[1].getBlue()*colorFadeFunction(size, size - x, y);
+        b += colors[2].getBlue()*colorFadeFunction(size, x, size - y);
+        b += colors[3].getBlue()*colorFadeFunction(size, size - x, size - y);
+        return new Color(r, g, b);
+    }
+
+    private float colorFadeFunction(int size, int x, int y) {
+        return (1.f - ((float)x / (float)size))*(1.f - ((float)y / (float)size));
     }
 
     @Override

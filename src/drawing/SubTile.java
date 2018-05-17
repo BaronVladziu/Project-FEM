@@ -5,7 +5,7 @@ import java.awt.geom.Rectangle2D;
 
 class SubTile extends Rectangle2D.Float {
 
-    private Color _fillColor;
+    private Color[] _colors = new Color[4];
     private float _posx;
     private float _posy;
     private float _size;
@@ -15,7 +15,9 @@ class SubTile extends Rectangle2D.Float {
         _posx = posx;
         _posy = posy;
         _size = size;
-        _fillColor = startColor;
+        for (int i = 0; i < 4; i++) {
+            _colors[i] = startColor;
+        }
     }
 
     void setTranslation(int x, int y, float zoom) {
@@ -25,21 +27,34 @@ class SubTile extends Rectangle2D.Float {
         super.height = _size * zoom;
     }
 
-    Color getColor() {
-        return _fillColor;
+    Color getColor(int nr) {
+        return _colors[nr];
+    }
+
+    Color[] getColors() {
+        return _colors;
     }
 
     void setColor(Color color) {
-        _fillColor = color;
+        for (int i = 0; i < 4; i++) {
+            _colors[i] = color;
+        }
     }
 
     void setColor(double nw, double ne, double sw, double se) {
-        int mean = (int)(255*sigmoid(nw + ne + sw + se));
+        setColor(0, nw);
+        setColor(1, ne);
+        setColor(2, sw);
+        setColor(3, se);
+    }
+
+    private void setColor(int nr, double value) {
+        int mean = (int)(255*sigmoid(value));
         if (mean > 0) {
-            _fillColor = new Color(mean, 255-mean, 0);
+            _colors[nr] = new Color(mean, 255-mean, 0);
         } else {
             mean = Math.abs(mean);
-            _fillColor = new Color(0, 255-mean, mean);
+            _colors[nr] = new Color(0, 255-mean, mean);
         }
     }
 

@@ -9,3 +9,11 @@ class App {
     }
 
 }
+
+/*
+TODO:
+- drawing with zoom
+- breaks in pressure
+- zooming pressure
+- showing drawn tile
+ */

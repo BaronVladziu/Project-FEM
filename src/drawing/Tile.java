@@ -46,7 +46,7 @@ class Tile {
         for (int i = 0; i < _split; i++) {
             for (int j = 0; j < _split; j++) {
                 _valueTilesTable[i][j] = new SubTile(_fillTile.getPosX() + i*_subSize,
-                        _fillTile.getPosY() + j*_subSize, _subSize, _fillTile.getColor());
+                        _fillTile.getPosY() + j*_subSize, _subSize, _fillTile.getColor(0));
             }
         }
     }
