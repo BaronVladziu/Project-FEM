@@ -76,7 +76,6 @@ public class Solver {
                 countTileTypes(nw, counters);
                 countTileTypes(sw, counters);
                 countTileTypes(se, counters);
-                System.out.println(Integer.toString(counters[0]) + " - " + Integer.toString(counters[1]) + " - " + Integer.toString(counters[2]));
                 if (counters[0] != 0) {
                     setSource(i, j);
                 } else if (counters[1] + counters[2] == 4) {
@@ -304,14 +303,7 @@ public class Solver {
     }
 
     private void setValueColors() {
-        _drawingSheet.setTileSplit(_r);
-        for (int i = 0; i < _drawingSheet.getNOTilesX()*_r; i++) {
-            for (int j = 0; j < _drawingSheet.getNOTilesY()*_r; j++) {
-                _drawingSheet.setValueColor(i/_r, j/_r, i%_r, j%_r,
-                        _realMatrix.get(_n, countK(i, j)), _realMatrix.get(_n, countK(i+1, j)),
-                        _realMatrix.get(_n, countK(i, j+1)), _realMatrix.get(_n, countK(i+1, j+1)));
-            }
-        }
+        _drawingSheet.setValues(_realMatrix, (float)_d); //TODO: different matrix
         _drawingSheet.switchToValueDraw();
     }
 

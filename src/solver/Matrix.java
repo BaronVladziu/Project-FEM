@@ -15,7 +15,7 @@ public class Matrix {
         _table = new double[sizeX][sizeY];
     }
 
-    double get(int x, int y) {
+    public double get(int x, int y) {
         return _table[x][y];
     }
 
@@ -96,11 +96,11 @@ public class Matrix {
         }
     }
 
-    int getSizeX() {
+    public int getSizeX() {
         return _sizeX;
     }
 
-    int getSizeY() {
+    public int getSizeY() {
         return _sizeY;
     }
 

@@ -1,9 +1,10 @@
 package drawing;
 
+import solver.Matrix;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Point2D;
 
 public class DrawingSheet extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
 
@@ -20,6 +21,7 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
     private TranslationController _translation = new TranslationController(this);
     private E_TileType _drawnTile = E_TileType.Wall;
     private boolean _ifValueDraw = false;
+    private GradientPrinter _gradientPrinter = new GradientPrinter();
 
     public DrawingSheet() {
         addMouseListener(this);
@@ -37,24 +39,11 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
         super.paintComponent(graphics);
         Graphics2D g2d = (Graphics2D) graphics;
         SubTile subtile;
-        for (int j = 0; j < _NOTilesy; j++) {
-            for (int i = 0; i < _NOTilesx; i++) {
-                if (_ifValueDraw && _tiles[i][j].getType() == E_TileType.Air) {
-                    for (int x = 0; x < _tiles[i][j].getSplit(); x++) {
-                        for (int y = 0; y < _tiles[i][j].getSplit(); y++) {
-                            subtile = _tiles[i][j].getValueSubTile(x, y);
-                            int size = (int)(subtile.getSize() * 100);
-                            int posX = (int)(subtile.getPosX() * 100);
-                            int posY = (int)(subtile.getPosY() * 100);
-                            for (int v1 = 0; v1 < size; v1++) {
-                                for (int v2 = 0; v2 < size; v2++) {
-                                    g2d.setColor(mixColors(subtile.getColors(), v1, v2, size));
-                                    g2d.fillRect(posX + v1, posY + v2, 1, 1);
-                                }
-                            }
-                        }
-                    }
-                } else {
+        if (_ifValueDraw) {
+            _gradientPrinter.print(g2d);
+        } else {
+            for (int j = 0; j < _NOTilesy; j++) {
+                for (int i = 0; i < _NOTilesx; i++) {
                     subtile = _tiles[i][j].getFillSubTile();
                     g2d.setColor(subtile.getColor(0));
                     g2d.fill(subtile);
@@ -63,29 +52,6 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
                 }
             }
         }
-    }
-
-    private Color mixColors(Color[] colors, int x, int y, int size) {
-        int r = 0;
-        int g = 0;
-        int b = 0;
-        r += colors[0].getRed()*colorFadeFunction(size, x, y);
-        r += colors[1].getRed()*colorFadeFunction(size, size - x, y);
-        r += colors[2].getRed()*colorFadeFunction(size, x, size - y);
-        r += colors[3].getRed()*colorFadeFunction(size, size - x, size - y);
-        g += colors[0].getGreen()*colorFadeFunction(size, x, y);
-        g += colors[1].getGreen()*colorFadeFunction(size, size - x, y);
-        g += colors[2].getGreen()*colorFadeFunction(size, x, size - y);
-        g += colors[3].getGreen()*colorFadeFunction(size, size - x, size - y);
-        b += colors[0].getBlue()*colorFadeFunction(size, x, y);
-        b += colors[1].getBlue()*colorFadeFunction(size, size - x, y);
-        b += colors[2].getBlue()*colorFadeFunction(size, x, size - y);
-        b += colors[3].getBlue()*colorFadeFunction(size, size - x, size - y);
-        return new Color(r, g, b);
-    }
-
-    private float colorFadeFunction(int size, int x, int y) {
-        return (1.f - ((float)x / (float)size))*(1.f - ((float)y / (float)size));
     }
 
     @Override
@@ -207,16 +173,8 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
         return E_TileType.Void;
     }
 
-    public void setTileSplit(int split) {
-        for (int j = 0; j < _NOTilesy; j++) {
-            for (int i = 0; i < _NOTilesx; i++) {
-                _tiles[i][j].createValueTable(split);
-            }
-        }
-    }
-
-    public void setValueColor(int x, int y, int rx, int ry, double nw, double ne, double sw, double se) {
-        _tiles[x][y].setColor(rx, ry, nw, ne, sw, se);
+    public void setValues(Matrix matrix, float subtileSize) {
+        _gradientPrinter.initialize(matrix, subtileSize);
     }
 
     public int getNOTilesX() {
