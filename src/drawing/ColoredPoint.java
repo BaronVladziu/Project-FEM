@@ -4,8 +4,8 @@ import java.awt.*;
 
 public class ColoredPoint {
 
-    private int _x;
-    private int _y;
+    private float _x;
+    private float _y;
     private Color _color;
 
     ColoredPoint(float x, float y, Color color) {
@@ -13,11 +13,11 @@ public class ColoredPoint {
         setColor(color);
     }
 
-    int getX() {
+    float getX() {
         return _x;
     }
 
-    int getY() {
+    float getY() {
         return _y;
     }
 
@@ -26,8 +26,8 @@ public class ColoredPoint {
     }
 
     void setPosition(float x, float y) {
-        _x = (int)x;
-        _y = (int)y;
+        _x = x;
+        _y = y;
     }
 
     void setColor(Color color) {

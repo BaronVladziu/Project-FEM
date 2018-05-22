@@ -38,20 +38,30 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
     public void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
         Graphics2D g2d = (Graphics2D) graphics;
-        SubTile subtile;
         if (_ifValueDraw) {
-            _gradientPrinter.print(g2d);
+            _gradientPrinter.print(g2d, _translation.getTransX(), _translation.getTransY(), _zoom.getZoom());
+            for (int j = 0; j < _NOTilesy; j++) {
+                for (int i = 0; i < _NOTilesx; i++) {
+                    if (_tiles[i][j].getType() != E_TileType.Air) {
+                        drawSubtile(g2d, i, j);
+                    }
+                }
+            }
         } else {
             for (int j = 0; j < _NOTilesy; j++) {
                 for (int i = 0; i < _NOTilesx; i++) {
-                    subtile = _tiles[i][j].getFillSubTile();
-                    g2d.setColor(subtile.getColor(0));
-                    g2d.fill(subtile);
-                    g2d.setColor(OUTLINE_COLOR);
-                    g2d.draw(subtile);
+                    drawSubtile(g2d, i, j);
                 }
             }
         }
+    }
+
+    private void drawSubtile(Graphics2D g2d, int x, int y) {
+        SubTile subtile = _tiles[x][y].getFillSubTile();
+        g2d.setColor(subtile.getColor(0));
+        g2d.fill(subtile);
+        g2d.setColor(OUTLINE_COLOR);
+        g2d.draw(subtile);
     }
 
     @Override

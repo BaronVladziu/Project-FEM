@@ -6,7 +6,8 @@ import java.awt.*;
 
 public class GradientPrinter {
 
-    private int _matrixSize;
+    private int _matrixSizeX;
+    private int _matrixSizeY;
     private ColoredPoint _points[][];
     private float _tileSize;
 
@@ -14,36 +15,99 @@ public class GradientPrinter {
 
     void initialize(Matrix matrix, float tileSize) {
         _tileSize = tileSize;
-        _matrixSize = matrix.getSizeY();
-        _points = new ColoredPoint[_matrixSize][_matrixSize];
-        for (int x = 0; x < _matrixSize; x++) {
-            for (int y = 0; y < _matrixSize; y++) {
+        _matrixSizeX = matrix.getSizeX();
+        _matrixSizeY = matrix.getSizeY();
+        _points = new ColoredPoint[_matrixSizeX][_matrixSizeY];
+        for (int x = 0; x < _matrixSizeX; x++) {
+            for (int y = 0; y < _matrixSizeY; y++) {
                 _points[x][y] = new ColoredPoint(x*_tileSize, y*_tileSize, countColor(matrix.get(x, y)));
             }
         }
     }
 
     private Color countColor(double value) {
-        int mean = (int)(255*sigmoid(value));
-        if (mean > 0) {
-            return new Color(mean, 255-mean, 0);
-        } else {
-            mean = Math.abs(mean);
-            return new Color(0, 255-mean, mean);
+        if (value < -1 || value > 1) {
+            throw new IllegalValueError("Color value not between -1 and 1!");
         }
+        value *= 4;
+        int rest = (int)(255*((value + 4) - ((int)(value + 4))));
+        System.out.println(Double.toString(value) + " --> " + Double.toString((value + 4) - ((int)(value + 4))));
+        //rest = 255-rest;
+
+        if (value > 0) {
+            if (value > 2) {
+                if (value > 3) {
+                    return new Color(255, rest, 255);
+                } else {
+                    return new Color(255, 0, rest);
+                }
+            } else {
+                if (value > 1) {
+                    return new Color(255, 255-rest, 0);
+                } else {
+                    return new Color(rest, 255, 0);
+                }
+            }
+        } else {
+            if (value > -2) {
+                if (value > -1) {
+                    return new Color(0, 255, 255-rest);
+                } else {
+                    return new Color(0, rest, 255);
+                }
+            } else {
+                if (value > -3) {
+                    return new Color(255-rest, 0, 255);
+                } else {
+                    return new Color(rest, 0, rest);
+                }
+            }
+        }
+
+//        if (value > 0) {
+//            if (value > 0.5) {
+//                if (value > 0.75) {
+//                    return new Color(255, rest, 255);
+//                } else {
+//                    return new Color(255, 0, rest);
+//                }
+//            } else {
+//                if (value > 0.25) {
+//                    return new Color(255, 255-rest, 0);
+//                } else {
+//                    return new Color(rest, 255, 0);
+//                }
+//            }
+//        } else {
+//            if (value > -0.5) {
+//                if (value > -0.25) {
+//                    return new Color(0, 255, 255-rest);
+//                } else {
+//                    return new Color(0, rest, 255);
+//                }
+//            } else {
+//                if (value > -0.75) {
+//                    return new Color(255-rest, 0, 255);
+//                } else {
+//                    return new Color(rest, 0, rest);
+//                }
+//            }
+//        }
     }
 
     private double sigmoid(double x) {
-        return (2/( 1 + Math.pow(Math.E,(-1*x))) - 1);
+        return (2/( 1 + Math.pow(Math.E,(-1*2*x))) - 1);
     }
 
-    void print(Graphics2D g2d) {
-        for (int x = 0; x < _matrixSize - 1; x++) {
-            for (int y = 0; y < _matrixSize - 1; y++) {
-                int posX = (int)(_points[x][y].getX());
-                int posY = (int)(_points[x][y].getY());
-                int sizeX = (int)(_points[x+1][y].getX() - _points[x][y].getX());
-                int sizeY = (int)(_points[x][y+1].getY() - _points[x][y].getY());
+    void print(Graphics2D g2d, int transX, int transY, float zoom) {
+        for (int x = 0; x < _matrixSizeX - 1; x++) {
+            for (int y = 0; y < _matrixSizeY - 1; y++) {
+                int posX = (int)(_points[x][y].getX()*zoom + transX);
+                int posY = (int)(_points[x][y].getY()*zoom + transY);
+                int posNextX = (int)(_points[x+1][y].getX()*zoom + transX);
+                int posNextY = (int)(_points[x][y+1].getY()*zoom + transY);
+                int sizeX = posNextX - posX;
+                int sizeY = posNextY - posY;
                 Color[] colors = {_points[x][y].getColor(), _points[x+1][y].getColor(),
                         _points[x][y+1].getColor(), _points[x+1][y+1].getColor()};
                 for (int v1 = 0; v1 < sizeX; v1++) {
@@ -76,7 +140,11 @@ public class GradientPrinter {
     }
 
     private float colorFadeFunction(int sizeX, int sizeY, int x, int y) {
-        return (1.f - ((float)x / (float)sizeX))*(1.f - ((float)y / (float)sizeY));
+        return linFun((float)x / (float)sizeX)*linFun((float)y / (float)sizeY);
+    }
+
+    private float linFun(float x) {
+        return 1.f - x;
     }
 
 }

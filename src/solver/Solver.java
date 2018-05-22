@@ -10,6 +10,7 @@ public class Solver {
 
     private Matrix _realMatrix;
     private Matrix _imaginaryMatrix;
+    private Matrix _valueMatrix;
     private int _n;
     private double _c;
     private double _w;
@@ -32,6 +33,7 @@ public class Solver {
         } catch (MatrixException e) {
             System.out.println(e.getMessage());
         }
+        createValueMatrix();
         scaleValues();
         setValueColors();
     }
@@ -41,7 +43,7 @@ public class Solver {
         _w = settings._f * 2 * Math.PI;
         _k = _w/_c;
         _mapD = settings._d;
-        double d = _c/(6*settings._f);
+        double d = _c/(20*settings._f); //TODO: Optimize
         _r = (int)(_mapD / d) + 1;
         _d = _mapD / _r;
         _alpha = _d*_d*_k*_k - 4;
@@ -297,13 +299,28 @@ public class Solver {
         return y*(_drawingSheet.getNOTilesX()*_r + 1) + x;
     }
 
+    private void createValueMatrix() {
+        _valueMatrix = new Matrix(_drawingSheet.getNOTilesX()*_r + 1, _drawingSheet.getNOTilesY()*_r + 1);
+        int x = 0;
+        int y = 0;
+        for (int i = 0; i < _n; i++) {
+            _valueMatrix.set(x, y, _realMatrix.get(_n, i));
+            x++;
+            if (x == _valueMatrix.getSizeX()) {
+                x = 0;
+                y++;
+            }
+        }
+    }
+
     private void scaleValues() {
-        double max = _realMatrix.getMaxAbsValue();
-        _realMatrix.scaleY(_n, 1/max);
+        double max = _valueMatrix.getMaxAbsValue();
+        _valueMatrix.scale(1/max);
     }
 
     private void setValueColors() {
-        _drawingSheet.setValues(_realMatrix, (float)_d); //TODO: different matrix
+        _valueMatrix.print();
+        _drawingSheet.setValues(_valueMatrix, (float)_d);
         _drawingSheet.switchToValueDraw();
     }
 

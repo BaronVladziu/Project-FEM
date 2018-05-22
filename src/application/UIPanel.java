@@ -19,7 +19,7 @@ public class UIPanel extends JComponent implements ActionListener {
 
     private final SettingInputPanel _planeXPanel = new SettingInputPanel("Plane length [m]:", "6");
     private final SettingInputPanel _planeYPanel = new SettingInputPanel("Plane width [m]:", "4");
-    private final SettingInputPanel _tileXPanel = new SettingInputPanel("Tile length [m]:", "1");
+    private final SettingInputPanel _tileXPanel = new SettingInputPanel("Tile length [m]:", "0.5");
     private final JButton _generatePlaneButton = new JButton("Generate plane");
     private final SettingInputPanel _cPanel = new SettingInputPanel("Sound speed [m/s]:", "340");
     private final SettingInputPanel _fPanel = new SettingInputPanel("Frequency [Hz]:", "100");
