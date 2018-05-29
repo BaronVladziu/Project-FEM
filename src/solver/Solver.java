@@ -1,18 +1,16 @@
 package solver;
 
-import drawing.DrawingSheet;
-import drawing.E_DrawValueType;
-import drawing.E_TileType;
-import drawing.TileTypeError;
+import application.ConsolePanel;
+import drawing.*;
 
 import static java.lang.Math.sqrt;
 
 public class Solver {
 
     private final DrawingSheet _drawingSheet;
+    private final ConsolePanel _console;
 
-    private Matrix _realMatrix;
-    private Matrix _imaginaryMatrix;
+    private Matrix _matrix;
     private Matrix _valueMatrix;
     private int _n;
     private double _c;
@@ -22,31 +20,39 @@ public class Solver {
     private int _r;
     private double _d;
     private double _alpha;
+    private double _g;
+    private double _z;
 
-    public Solver(DrawingSheet drawingSheet) {
+    public Solver(DrawingSheet drawingSheet, ConsolePanel console) {
         _drawingSheet = drawingSheet;
+        _console = console;
     }
 
     public void solve(SimulationSettings settings) {
         updateConstants(settings);
         createMatrices();
         try {
-            _realMatrix.solve();
-            _imaginaryMatrix.solve();
+            _matrix.solve();
         } catch (MatrixException e) {
-            System.out.println(e.getMessage());
+            _console.display(e.getMessage());
         }
-        createValueMatrix();
+        updateValueMatrix(settings.getDrawValueType());
+    }
+
+    public void updateValueMatrix(E_DrawValueType valueType) {
+        createValueMatrix(valueType);
         scaleValues();
         setValueColors();
     }
 
     private void  updateConstants(SimulationSettings settings) {
-        _c = settings._c;
-        _w = settings._f * 2 * Math.PI;
+        _c = settings.getC();
+        _g = settings.getG();
+        _z = _c*_g;
+        _w = settings.getF() * 2 * Math.PI;
         _k = _w/_c;
-        _mapD = settings._d;
-        double d = _c/(6*settings._f); //TODO: Optimize
+        _mapD = settings.getD();
+        double d = _c/(6*settings.getF());
         _r = (int)(_mapD / d) + 1;
         _d = _mapD / _r;
         _alpha = _d*_d*_k*_k - 4;
@@ -54,8 +60,7 @@ public class Solver {
 
     private void createMatrices() {
         _n = (_drawingSheet.getNOTilesX()*_r + 1) * (_drawingSheet.getNOTilesY()*_r + 1);
-        _realMatrix = new Matrix(_n + 1, _n);
-        _imaginaryMatrix = new Matrix(_n + 1, _n);
+        _matrix = new Matrix(2*_n + 1, 2*_n);
         E_TileType ne, se, sw, nw;
         int counters[] = new int[3]; //SOURCES, WALLS, VOIDS
         for (int i = 0; i <= _drawingSheet.getNOTilesX()*_r; i++) {
@@ -194,112 +199,169 @@ public class Solver {
     }
 
     private void setSource(int x, int y) {
-        int k = countK(x, y);
-        _realMatrix.set(k, k, 1);
-        _realMatrix.set(_realMatrix.getSizeX() - 1, k, 1);
-        _imaginaryMatrix.set(k, k, 1);
+        int k = countK(x, y, true);
+        _matrix.set(k, k, 1);
+        _matrix.set(_matrix.getSizeX() - 1, k, 1);
     }
 
     private void setFunction(int x, int y) {
-        int k = countK(x, y);
-        _realMatrix.set(k, k, _alpha);
-        _imaginaryMatrix.set(k, k, _alpha);
-        int l = countK(x-1, y);
-        _realMatrix.set(l, k, 1);
-        _imaginaryMatrix.set(l, k, 1);
-        l = countK(x+1, y);
-        _realMatrix.set(l, k, 1);
-        _imaginaryMatrix.set(l, k, 1);
-        l = countK(x, y-1);
-        _realMatrix.set(l, k, 1);
-        _imaginaryMatrix.set(l, k, 1);
-        l = countK(x, y+1);
-        _realMatrix.set(l, k, 1);
-        _imaginaryMatrix.set(l, k, 1);
+        setFunction(x, y, true);
+        setFunction(x, y, false);
+    }
+
+    private void setFunction(int x, int y, boolean ifReal) {
+        int k = countK(x, y, ifReal);
+        _matrix.set(k, k, _alpha);
+        int l = countK(x-1, y, ifReal);
+        _matrix.set(l, k, 1);
+        l = countK(x+1, y, ifReal);
+        _matrix.set(l, k, 1);
+        l = countK(x, y-1, ifReal);
+        _matrix.set(l, k, 1);
+        l = countK(x, y+1, ifReal);
+        _matrix.set(l, k, 1);
     }
 
     private void setWall(int x, int y, E_Direction8 dir) {
-        int k = countK(x, y);
+        setWall(x, y, dir, true);
+        setWall(x, y, dir, false);
+    }
+
+    private void setWall(int x, int y, E_Direction8 dir, boolean ifReal) {
+        int k = countK(x, y, ifReal);
         switch (dir) {
             case E: {
-                _realMatrix.set(k, k, 1/_d);
-                _imaginaryMatrix.set(k, k, 1/_d);
-                int l = countK(x-1, y);
-                _realMatrix.set(l, k, -1/_d);
-                _imaginaryMatrix.set(l, k, -1/_d);
+                _matrix.set(k, k, 1);
+                int l = countK(x-1, y, ifReal);
+                _matrix.set(l, k, -1);
                 break;
             }
             case NE: {
-                _realMatrix.set(k, k, 1/_d);
-                _imaginaryMatrix.set(k, k, 1/_d);
-                int l = countK(x-1, y+1);
-                _realMatrix.set(l, k, -1/(sqrt(2)*_d));
-                _imaginaryMatrix.set(l, k, -1/(sqrt(2)*_d));
+                _matrix.set(k, k, 1);
+                int l = countK(x-1, y+1, ifReal);
+                _matrix.set(l, k, -1);
                 break;
             }
             case NW: {
-                _realMatrix.set(k, k, -1/_d);
-                _imaginaryMatrix.set(k, k, -1/_d);
-                int l = countK(x+1, y+1);
-                _realMatrix.set(l, k, 1/(sqrt(2)*_d));
-                _imaginaryMatrix.set(l, k, 1/(sqrt(2)*_d));
+                _matrix.set(k, k, -1);
+                int l = countK(x+1, y+1, ifReal);
+                _matrix.set(l, k, 1);
                 break;
             }
             case SE: {
-                _realMatrix.set(k, k, 1/_d);
-                _imaginaryMatrix.set(k, k, 1/_d);
-                int l = countK(x-1, y-1);
-                _realMatrix.set(l, k, -1/(sqrt(2)*_d));
-                _imaginaryMatrix.set(l, k, -1/(sqrt(2)*_d));
+                _matrix.set(k, k, 1);
+                int l = countK(x-1, y-1, ifReal);
+                _matrix.set(l, k, -1);
                 break;
             }
             case SW: {
-                _realMatrix.set(k, k, -1/_d);
-                _imaginaryMatrix.set(k, k, -1/_d);
-                int l = countK(x+1, y-1);
-                _realMatrix.set(l, k, 1/(sqrt(2)*_d));
-                _imaginaryMatrix.set(l, k, 1/(sqrt(2)*_d));
+                _matrix.set(k, k, -1);
+                int l = countK(x+1, y-1, ifReal);
+                _matrix.set(l, k, 1);
                 break;
             }
             case N: {
-                _realMatrix.set(k, k, -1/_d);
-                _imaginaryMatrix.set(k, k, -1/_d);
-                int l = countK(x, y+1);
-                _realMatrix.set(l, k, 1/_d);
-                _imaginaryMatrix.set(l, k, 1/_d);
+                _matrix.set(k, k, -1);
+                int l = countK(x, y+1, ifReal);
+                _matrix.set(l, k, 1);
                 break;
             }
             case S: {
-                _realMatrix.set(k, k, 1/_d);
-                _imaginaryMatrix.set(k, k, 1/_d);
-                int l = countK(x, y-1);
-                _realMatrix.set(l, k, -1/_d);
-                _imaginaryMatrix.set(l, k, -1/_d);
+                _matrix.set(k, k, 1);
+                int l = countK(x, y-1, ifReal);
+                _matrix.set(l, k, -1);
                 break;
             }
             case W: {
-                _realMatrix.set(k, k, -1/_d);
-                _imaginaryMatrix.set(k, k, -1/_d);
-                int l = countK(x+1, y);
-                _realMatrix.set(l, k, 1/_d);
-                _imaginaryMatrix.set(l, k, 1/_d);
+                _matrix.set(k, k, -1);
+                int l = countK(x+1, y, ifReal);
+                _matrix.set(l, k, 1);
                 break;
             }
         }
     }
 
     private void setBorder(int x, int y, E_Direction8 dir) {
-        setZero(x, y); //TODO
+        int kr = countK(x, y, true);
+        int ki = countK(x, y, false);
+        double a = (_z)/(_w*_g*_d);
+        switch (dir) {
+            case E: {
+                int li = countK(x-1, y, false);
+                _matrix.set(kr, kr, 1);
+                _matrix.set(ki, kr, a);
+                _matrix.set(li, kr, -a);
+                int lr = countK(x-1, y, true);
+                _matrix.set(ki, ki, 1);
+                _matrix.set(kr, ki, -a);
+                _matrix.set(lr, ki, a);
+                break;
+            }
+            case NE: {
+                a /= sqrt(2);
+                _matrix.set(k, k, 1);
+                int l = countK(x-1, y+1, ifReal);
+                _matrix.set(l, k, -1);
+                break;
+            }
+            case NW: {
+                a /= sqrt(2);
+                _matrix.set(k, k, -1);
+                int l = countK(x+1, y+1, ifReal);
+                _matrix.set(l, k, 1);
+                break;
+            }
+            case SE: {
+                a /= sqrt(2);
+                _matrix.set(k, k, 1);
+                int l = countK(x-1, y-1, ifReal);
+                _matrix.set(l, k, -1);
+                break;
+            }
+            case SW: {
+                a /= sqrt(2);
+                _matrix.set(k, k, -1);
+                int l = countK(x+1, y-1, ifReal);
+                _matrix.set(l, k, 1);
+                break;
+            }
+            case N: {
+                _matrix.set(k, k, -1);
+                int l = countK(x, y+1, ifReal);
+                _matrix.set(l, k, 1);
+                break;
+            }
+            case S: {
+                _matrix.set(k, k, 1);
+                int l = countK(x, y-1, ifReal);
+                _matrix.set(l, k, -1);
+                break;
+            }
+            case W: {
+                _matrix.set(k, k, -1);
+                int l = countK(x+1, y, ifReal);
+                _matrix.set(l, k, 1);
+                break;
+            }
+        }
     }
 
     private void setZero(int x, int y) {
-        int k = countK(x, y);
-        _realMatrix.set(k, k, 1);
-        _imaginaryMatrix.set(k, k, 1);
+        setZero(x, y, true);
+        setZero(x, y, false);
     }
 
-    private int countK(int x, int y) {
-        return y*(_drawingSheet.getNOTilesX()*_r + 1) + x;
+    private void setZero(int x, int y, boolean ifReal) {
+        int k = countK(x, y, ifReal);
+        _matrix.set(k, k, 1);
+    }
+
+    private int countK(int x, int y, boolean ifReal) {
+        if (ifReal) {
+            return y*(2*(_drawingSheet.getNOTilesX()*_r + 1)) + 2*x;
+        } else {
+            return y*(2*(_drawingSheet.getNOTilesX()*_r + 1)) + 2*x + 1;
+        }
     }
 
     private void createValueMatrix(E_DrawValueType valueType) {
@@ -323,10 +385,9 @@ public class Solver {
                     break;
                 }
                 default: {
-                    throw
+                    throw new IllegalValueError("Unsupported draw value type");
                 }
             }
-
             x++;
             if (x == _valueMatrix.getSizeX()) {
                 x = 0;

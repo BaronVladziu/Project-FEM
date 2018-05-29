@@ -1,6 +1,8 @@
 package application;
 
+import drawing.Drawer;
 import drawing.DrawingPlaneSettings;
+import drawing.E_DrawValueType;
 import solver.SimulationSettings;
 import solver.Solver;
 
@@ -15,10 +17,11 @@ public class UIPanel extends JComponent implements ActionListener {
     private static final int _INPUT_LENGTH = 30;
     private static final int _BAR_HEIGHT = 25;
     private static final int _GAP_LENGTH = 10;
-    private final Solver _solver;
+    private Solver _solver;
+    private Drawer _drawer;
 
-    private final SettingInputPanel _planeXPanel = new SettingInputPanel("Plane length [m]:", "6");
-    private final SettingInputPanel _planeYPanel = new SettingInputPanel("Plane width [m]:", "4");
+    private final SettingInputPanel _planeXPanel = new SettingInputPanel("Plane length [m]:", "4");
+    private final SettingInputPanel _planeYPanel = new SettingInputPanel("Plane width [m]:", "5");
     private final SettingInputPanel _tileXPanel = new SettingInputPanel("Tile length [m]:", "0.5");
     private final JButton _generatePlaneButton = new JButton("Generate plane");
     private final SettingInputPanel _cPanel = new SettingInputPanel("Sound speed [m/s]:", "340");
@@ -26,10 +29,11 @@ public class UIPanel extends JComponent implements ActionListener {
     private final JButton _solveButton = new JButton("Solve");
     private final ChooseList _chooseList = new ChooseList();
     private final JButton _showButton = new JButton("Show result");
+    private final ConsolePanel _console = new ConsolePanel(_NAME_LENGTH + _GAP_LENGTH + _INPUT_LENGTH, 800);
 
-    UIPanel(Window window, Solver solver) {
-        _solver = solver;
+    UIPanel(Window window) {
         _chooseList.add("Real part");
+        _chooseList.set(E_DrawValueType.RealPart);
         _chooseList.add("Imaginary part");
         _chooseList.add("Absolute value");
         JComponent _comp1 = new JPanel();
@@ -41,21 +45,32 @@ public class UIPanel extends JComponent implements ActionListener {
         _comp1.add(_generatePlaneButton);
         _generatePlaneButton.addActionListener(window);
         _generatePlaneButton.setPreferredSize(new Dimension(_comp1.getPreferredSize().width, _BAR_HEIGHT));
-        _solveButton.addActionListener(this);
-        _solveButton.setPreferredSize(new Dimension(_comp1.getPreferredSize().width, _BAR_HEIGHT));
         _comp1.add(_generatePlaneButton);
         _comp1.add(_cPanel);
         _comp1.add(_fPanel);
+        _solveButton.addActionListener(this);
+        _solveButton.setPreferredSize(new Dimension(_comp1.getPreferredSize().width, _BAR_HEIGHT));
         _comp1.add(_solveButton);
         _chooseList.setPreferredSize(new Dimension(_comp1.getPreferredSize().width, _BAR_HEIGHT));
         _comp1.add(_chooseList);
         _showButton.setPreferredSize(new Dimension(_comp1.getPreferredSize().width, _BAR_HEIGHT));
         _comp1.add(_showButton);
         _comp1.setVisible(true);
-        setPreferredSize(new Dimension( _comp1.getPreferredSize().width + _GAP_LENGTH, 900));
+        setPreferredSize(new Dimension( _comp1.getPreferredSize().width + _GAP_LENGTH + _console.getPreferredSize().width, 900));
         setLayout(new FlowLayout());
         add(_comp1);
+        add(_console);
         setVisible(true);
+    }
+
+    void setSolver(Solver solver) {
+        _solver = solver;
+        _drawer = new Drawer(this, _solver);
+        _showButton.addActionListener(_drawer);
+    }
+
+    ConsolePanel getConsole() {
+        return _console;
     }
 
     @Override
@@ -72,11 +87,14 @@ public class UIPanel extends JComponent implements ActionListener {
     }
 
     public SimulationSettings getSimulationSettings() {
-        SimulationSettings settings = new SimulationSettings();
-        settings._c = Double.parseDouble(_cPanel.getInput());
-        settings._f = Double.parseDouble(_fPanel.getInput());
-        settings._d = Double.parseDouble(_tileXPanel.getInput());
-        return settings;
+        return new SimulationSettings(Double.parseDouble(_cPanel.getInput()),
+                Double.parseDouble(_fPanel.getInput()),
+                Double.parseDouble(_tileXPanel.getInput()),
+                _chooseList.getDrawValueType());
+    }
+
+    public E_DrawValueType getDrawValueType() {
+        return _chooseList.getDrawValueType();
     }
 
 }

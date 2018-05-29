@@ -29,74 +29,24 @@ public class GradientPrinter {
         if (value < -1 || value > 1) {
             throw new IllegalValueError("Color value not between -1 and 1!");
         }
-        value *= 4;
-        int rest = (int)(255*((value + 4) - ((int)(value + 4))));
-        System.out.println(Double.toString(value) + " --> " + Double.toString((value + 4) - ((int)(value + 4))));
-        //rest = 255-rest;
+        int valueRange = 2;
+        value *= valueRange;
+        int rest = (int)(255*((value + valueRange) - ((int)(value + valueRange))));
+        System.out.println(Double.toString(value) + " --> " + Double.toString((value + valueRange) - ((int)(value + valueRange))));
 
         if (value > 0) {
-            if (value > 2) {
-                if (value > 3) {
-                    return new Color(255, rest, 255);
-                } else {
-                    return new Color(255, 0, rest);
-                }
+            if (value > 1) {
+                return new Color(255, 255-rest, 0);
             } else {
-                if (value > 1) {
-                    return new Color(255, 255-rest, 0);
-                } else {
-                    return new Color(rest, 255, 0);
-                }
+                return new Color(rest, 255, 0);
             }
         } else {
-            if (value > -2) {
-                if (value > -1) {
-                    return new Color(0, 255, 255-rest);
-                } else {
-                    return new Color(0, rest, 255);
-                }
+            if (value > -1) {
+                return new Color(0, 255, 255-rest);
             } else {
-                if (value > -3) {
-                    return new Color(255-rest, 0, 255);
-                } else {
-                    return new Color(rest, 0, rest);
-                }
+                return new Color(0, rest, 255);
             }
         }
-
-//        if (value > 0) {
-//            if (value > 0.5) {
-//                if (value > 0.75) {
-//                    return new Color(255, rest, 255);
-//                } else {
-//                    return new Color(255, 0, rest);
-//                }
-//            } else {
-//                if (value > 0.25) {
-//                    return new Color(255, 255-rest, 0);
-//                } else {
-//                    return new Color(rest, 255, 0);
-//                }
-//            }
-//        } else {
-//            if (value > -0.5) {
-//                if (value > -0.25) {
-//                    return new Color(0, 255, 255-rest);
-//                } else {
-//                    return new Color(0, rest, 255);
-//                }
-//            } else {
-//                if (value > -0.75) {
-//                    return new Color(255-rest, 0, 255);
-//                } else {
-//                    return new Color(rest, 0, rest);
-//                }
-//            }
-//        }
-    }
-
-    private double sigmoid(double x) {
-        return (2/( 1 + Math.pow(Math.E,(-1*2*x))) - 1);
     }
 
     void print(Graphics2D g2d, int transX, int transY, float zoom) {

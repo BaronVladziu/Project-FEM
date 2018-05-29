@@ -25,10 +25,6 @@ class Tile {
         _fillTile.setColor(color);
     }
 
-    double sigmoid(double x) {
-        return (2/( 1 + Math.pow(Math.E,(-1*x))) - 1);
-    }
-
     float getPosX() {
         return _fillTile.getPosX();
     }

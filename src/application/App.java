@@ -12,9 +12,6 @@ class App {
 
 /*
 TODO:
- - better colors
  - value bar
  - exit border
- - drawing other values
- - console
 */

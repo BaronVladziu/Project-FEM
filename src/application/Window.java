@@ -12,8 +12,8 @@ import java.awt.event.ActionListener;
 class Window extends JFrame implements ActionListener {
 
     private final DrawingSheet _drawPanel = new DrawingSheet();
-    private final Solver _solver = new Solver(_drawPanel);
-    private final UIPanel _uiPanel = new UIPanel(this, _solver);
+    private final UIPanel _uiPanel = new UIPanel(this);
+    private final Solver _solver = new Solver(_drawPanel, _uiPanel.getConsole());
 
     public Window() {
         super("Project-FEM");
@@ -24,6 +24,7 @@ class Window extends JFrame implements ActionListener {
         add(_uiPanel, BorderLayout.EAST);
         pack();
         setVisible(true);
+        _uiPanel.setSolver(_solver);
     }
 
     @Override

@@ -2,7 +2,7 @@ package drawing;
 
 public class IllegalValueError extends Error{
 
-    IllegalValueError(String message) {
+    public IllegalValueError(String message) {
         super(message);
     }
 

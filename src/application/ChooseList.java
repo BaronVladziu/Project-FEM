@@ -25,6 +25,10 @@ public class ChooseList extends Choice implements ItemListener {
         }
     }
 
+    void set(E_DrawValueType drawValueType) {
+        _drawValueType = drawValueType;
+    }
+
     E_DrawValueType getDrawValueType() {
         return _drawValueType;
     }

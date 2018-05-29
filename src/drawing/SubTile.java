@@ -41,26 +41,26 @@ class SubTile extends Rectangle2D.Float {
         }
     }
 
-    void setColor(double nw, double ne, double sw, double se) {
-        setColor(0, nw);
-        setColor(1, ne);
-        setColor(2, sw);
-        setColor(3, se);
-    }
-
-    private void setColor(int nr, double value) {
-        int mean = (int)(255*sigmoid(value));
-        if (mean > 0) {
-            _colors[nr] = new Color(mean, 255-mean, 0);
-        } else {
-            mean = Math.abs(mean);
-            _colors[nr] = new Color(0, 255-mean, mean);
-        }
-    }
-
-    double sigmoid(double x) {
-        return (2/( 1 + Math.pow(Math.E,(-1*x))) - 1);
-    }
+//    void setColor(double nw, double ne, double sw, double se) {
+//        setColor(0, nw);
+//        setColor(1, ne);
+//        setColor(2, sw);
+//        setColor(3, se);
+//    }
+//
+//    private void setColor(int nr, double value) {
+//        int mean = (int)(255*sigmoid(value));
+//        if (mean > 0) {
+//            _colors[nr] = new Color(mean, 255-mean, 0);
+//        } else {
+//            mean = Math.abs(mean);
+//            _colors[nr] = new Color(0, 255-mean, mean);
+//        }
+//    }
+//
+//    double sigmoid(double x) {
+//        return (2/( 1 + Math.pow(Math.E,(-1*x))) - 1);
+//    }
 
     float getPosX() {
         return _posx;
