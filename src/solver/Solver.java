@@ -1,8 +1,11 @@
 package solver;
 
 import drawing.DrawingSheet;
+import drawing.E_DrawValueType;
 import drawing.E_TileType;
 import drawing.TileTypeError;
+
+import static java.lang.Math.sqrt;
 
 public class Solver {
 
@@ -43,7 +46,7 @@ public class Solver {
         _w = settings._f * 2 * Math.PI;
         _k = _w/_c;
         _mapD = settings._d;
-        double d = _c/(20*settings._f); //TODO: Optimize
+        double d = _c/(6*settings._f); //TODO: Optimize
         _r = (int)(_mapD / d) + 1;
         _d = _mapD / _r;
         _alpha = _d*_d*_k*_k - 4;
@@ -230,32 +233,32 @@ public class Solver {
                 _realMatrix.set(k, k, 1/_d);
                 _imaginaryMatrix.set(k, k, 1/_d);
                 int l = countK(x-1, y+1);
-                _realMatrix.set(l, k, -1/(Math.sqrt(2)*_d));
-                _imaginaryMatrix.set(l, k, -1/(Math.sqrt(2)*_d));
+                _realMatrix.set(l, k, -1/(sqrt(2)*_d));
+                _imaginaryMatrix.set(l, k, -1/(sqrt(2)*_d));
                 break;
             }
             case NW: {
                 _realMatrix.set(k, k, -1/_d);
                 _imaginaryMatrix.set(k, k, -1/_d);
                 int l = countK(x+1, y+1);
-                _realMatrix.set(l, k, 1/(Math.sqrt(2)*_d));
-                _imaginaryMatrix.set(l, k, 1/(Math.sqrt(2)*_d));
+                _realMatrix.set(l, k, 1/(sqrt(2)*_d));
+                _imaginaryMatrix.set(l, k, 1/(sqrt(2)*_d));
                 break;
             }
             case SE: {
                 _realMatrix.set(k, k, 1/_d);
                 _imaginaryMatrix.set(k, k, 1/_d);
                 int l = countK(x-1, y-1);
-                _realMatrix.set(l, k, -1/(Math.sqrt(2)*_d));
-                _imaginaryMatrix.set(l, k, -1/(Math.sqrt(2)*_d));
+                _realMatrix.set(l, k, -1/(sqrt(2)*_d));
+                _imaginaryMatrix.set(l, k, -1/(sqrt(2)*_d));
                 break;
             }
             case SW: {
                 _realMatrix.set(k, k, -1/_d);
                 _imaginaryMatrix.set(k, k, -1/_d);
                 int l = countK(x+1, y-1);
-                _realMatrix.set(l, k, 1/(Math.sqrt(2)*_d));
-                _imaginaryMatrix.set(l, k, 1/(Math.sqrt(2)*_d));
+                _realMatrix.set(l, k, 1/(sqrt(2)*_d));
+                _imaginaryMatrix.set(l, k, 1/(sqrt(2)*_d));
                 break;
             }
             case N: {
@@ -299,12 +302,31 @@ public class Solver {
         return y*(_drawingSheet.getNOTilesX()*_r + 1) + x;
     }
 
-    private void createValueMatrix() {
+    private void createValueMatrix(E_DrawValueType valueType) {
+
         _valueMatrix = new Matrix(_drawingSheet.getNOTilesX()*_r + 1, _drawingSheet.getNOTilesY()*_r + 1);
         int x = 0;
         int y = 0;
         for (int i = 0; i < _n; i++) {
-            _valueMatrix.set(x, y, _realMatrix.get(_n, i));
+            switch (valueType) {
+                case RealPart: {
+                    _valueMatrix.set(x, y, _realMatrix.get(_n, i));
+                    break;
+                }
+                case ImaginaryPart: {
+                    _valueMatrix.set(x, y, _imaginaryMatrix.get(_n, i));
+                    break;
+                }
+                case AbsoluteValue: {
+                    _valueMatrix.set(x, y, Math.sqrt(Math.pow(_realMatrix.get(_n, i), 2) +
+                            Math.pow(_imaginaryMatrix.get(_n, i), 2)));
+                    break;
+                }
+                default: {
+                    throw
+                }
+            }
+
             x++;
             if (x == _valueMatrix.getSizeX()) {
                 x = 0;

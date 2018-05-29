@@ -24,9 +24,14 @@ public class UIPanel extends JComponent implements ActionListener {
     private final SettingInputPanel _cPanel = new SettingInputPanel("Sound speed [m/s]:", "340");
     private final SettingInputPanel _fPanel = new SettingInputPanel("Frequency [Hz]:", "100");
     private final JButton _solveButton = new JButton("Solve");
+    private final ChooseList _chooseList = new ChooseList();
+    private final JButton _showButton = new JButton("Show result");
 
     UIPanel(Window window, Solver solver) {
         _solver = solver;
+        _chooseList.add("Real part");
+        _chooseList.add("Imaginary part");
+        _chooseList.add("Absolute value");
         JComponent _comp1 = new JPanel();
         _comp1.setPreferredSize(new Dimension(_NAME_LENGTH + _GAP_LENGTH + _INPUT_LENGTH, 800));
         _comp1.setLayout(new FlowLayout());
@@ -42,6 +47,10 @@ public class UIPanel extends JComponent implements ActionListener {
         _comp1.add(_cPanel);
         _comp1.add(_fPanel);
         _comp1.add(_solveButton);
+        _chooseList.setPreferredSize(new Dimension(_comp1.getPreferredSize().width, _BAR_HEIGHT));
+        _comp1.add(_chooseList);
+        _showButton.setPreferredSize(new Dimension(_comp1.getPreferredSize().width, _BAR_HEIGHT));
+        _comp1.add(_showButton);
         _comp1.setVisible(true);
         setPreferredSize(new Dimension( _comp1.getPreferredSize().width + _GAP_LENGTH, 900));
         setLayout(new FlowLayout());
