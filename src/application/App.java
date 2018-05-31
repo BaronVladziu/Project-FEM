@@ -13,5 +13,4 @@ class App {
 /*
 TODO:
  - value bar
- - exit border
 */

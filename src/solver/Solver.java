@@ -29,20 +29,26 @@ public class Solver {
     }
 
     public void solve(SimulationSettings settings) {
+        _console.display("Solving...");
         updateConstants(settings);
-        createMatrices();
+        createMatrix();
+        //_matrix.print();
         try {
             _matrix.solve();
         } catch (MatrixException e) {
             _console.display(e.getMessage());
         }
+        _console.display("Solved");
+        //_matrix.print();
         updateValueMatrix(settings.getDrawValueType());
     }
 
     public void updateValueMatrix(E_DrawValueType valueType) {
+        _console.display("Printing...");
         createValueMatrix(valueType);
         scaleValues();
         setValueColors();
+        _console.display("Printed");
     }
 
     private void  updateConstants(SimulationSettings settings) {
@@ -58,7 +64,7 @@ public class Solver {
         _alpha = _d*_d*_k*_k - 4;
     }
 
-    private void createMatrices() {
+    private void createMatrix() {
         _n = (_drawingSheet.getNOTilesX()*_r + 1) * (_drawingSheet.getNOTilesY()*_r + 1);
         _matrix = new Matrix(2*_n + 1, 2*_n);
         E_TileType ne, se, sw, nw;
@@ -202,6 +208,8 @@ public class Solver {
         int k = countK(x, y, true);
         _matrix.set(k, k, 1);
         _matrix.set(_matrix.getSizeX() - 1, k, 1);
+        k = countK(x, y, false);
+        _matrix.set(k, k, 1);
     }
 
     private void setFunction(int x, int y) {
@@ -285,65 +293,62 @@ public class Solver {
         int kr = countK(x, y, true);
         int ki = countK(x, y, false);
         double a = (_z)/(_w*_g*_d);
+        int lr, li;
         switch (dir) {
             case E: {
-                int li = countK(x-1, y, false);
-                _matrix.set(kr, kr, 1);
-                _matrix.set(ki, kr, a);
-                _matrix.set(li, kr, -a);
-                int lr = countK(x-1, y, true);
-                _matrix.set(ki, ki, 1);
-                _matrix.set(kr, ki, -a);
-                _matrix.set(lr, ki, a);
+                li = countK(x-1, y, false);
+                lr = countK(x-1, y, true);
                 break;
             }
             case NE: {
                 a /= sqrt(2);
-                _matrix.set(k, k, 1);
-                int l = countK(x-1, y+1, ifReal);
-                _matrix.set(l, k, -1);
+                li = countK(x-1, y+1, false);
+                lr = countK(x-1, y+1, true);
                 break;
             }
             case NW: {
                 a /= sqrt(2);
-                _matrix.set(k, k, -1);
-                int l = countK(x+1, y+1, ifReal);
-                _matrix.set(l, k, 1);
+                li = countK(x+1, y+1, false);
+                lr = countK(x+1, y+1, true);
                 break;
             }
             case SE: {
                 a /= sqrt(2);
-                _matrix.set(k, k, 1);
-                int l = countK(x-1, y-1, ifReal);
-                _matrix.set(l, k, -1);
+                li = countK(x-1, y-1, false);
+                lr = countK(x-1, y-1, true);
                 break;
             }
             case SW: {
                 a /= sqrt(2);
-                _matrix.set(k, k, -1);
-                int l = countK(x+1, y-1, ifReal);
-                _matrix.set(l, k, 1);
+                li = countK(x+1, y-1, false);
+                lr = countK(x+1, y-1, true);
                 break;
             }
             case N: {
-                _matrix.set(k, k, -1);
-                int l = countK(x, y+1, ifReal);
-                _matrix.set(l, k, 1);
+                li = countK(x, y+1, false);
+                lr = countK(x, y+1, true);
                 break;
             }
             case S: {
-                _matrix.set(k, k, 1);
-                int l = countK(x, y-1, ifReal);
-                _matrix.set(l, k, -1);
+                li = countK(x, y-1, false);
+                lr = countK(x, y-1, true);
                 break;
             }
             case W: {
-                _matrix.set(k, k, -1);
-                int l = countK(x+1, y, ifReal);
-                _matrix.set(l, k, 1);
+                li = countK(x+1, y, false);
+                lr = countK(x+1, y, true);
                 break;
             }
+            default: {
+                throw new IllegalValueError("Unknown direction!");
+            }
         }
+        _matrix.set(kr, kr, 1);
+        _matrix.set(ki, kr, a);
+        _matrix.set(li, kr, -a);
+        _matrix.set(ki, ki, 1);
+        _matrix.set(kr, ki, -a);
+        _matrix.set(lr, ki, a);
     }
 
     private void setZero(int x, int y) {
@@ -365,23 +370,22 @@ public class Solver {
     }
 
     private void createValueMatrix(E_DrawValueType valueType) {
-
         _valueMatrix = new Matrix(_drawingSheet.getNOTilesX()*_r + 1, _drawingSheet.getNOTilesY()*_r + 1);
         int x = 0;
         int y = 0;
         for (int i = 0; i < _n; i++) {
             switch (valueType) {
                 case RealPart: {
-                    _valueMatrix.set(x, y, _realMatrix.get(_n, i));
+                    _valueMatrix.set(x, y, _matrix.get(2*_n, 2*i));
                     break;
                 }
                 case ImaginaryPart: {
-                    _valueMatrix.set(x, y, _imaginaryMatrix.get(_n, i));
+                    _valueMatrix.set(x, y, _matrix.get(2*_n, 2*i + 1));
                     break;
                 }
                 case AbsoluteValue: {
-                    _valueMatrix.set(x, y, Math.sqrt(Math.pow(_realMatrix.get(_n, i), 2) +
-                            Math.pow(_imaginaryMatrix.get(_n, i), 2)));
+                    _valueMatrix.set(x, y, Math.sqrt(Math.pow(_matrix.get(2*_n, 2*i), 2) +
+                            Math.pow(_matrix.get(2*_n, 2*i + 1), 2)));
                     break;
                 }
                 default: {
@@ -394,6 +398,7 @@ public class Solver {
                 y++;
             }
         }
+        //_valueMatrix.print();
     }
 
     private void scaleValues() {
@@ -402,7 +407,6 @@ public class Solver {
     }
 
     private void setValueColors() {
-        _valueMatrix.print();
         _drawingSheet.setValues(_valueMatrix, (float)_d);
         _drawingSheet.switchToValueDraw();
     }

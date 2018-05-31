@@ -29,8 +29,10 @@ class Window extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent event) {
+        _uiPanel.getConsole().display("Plane generating...");
         DrawingPlaneSettings settings = _uiPanel.getPlaneSettings();
         _drawPanel.generatePlane(settings.planeX, settings.planeY, settings.tileSize);
+        _uiPanel.getConsole().display("Plane generated");
     }
 
 }

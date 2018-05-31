@@ -24,7 +24,8 @@ public class UIPanel extends JComponent implements ActionListener {
     private final SettingInputPanel _planeYPanel = new SettingInputPanel("Plane width [m]:", "5");
     private final SettingInputPanel _tileXPanel = new SettingInputPanel("Tile length [m]:", "0.5");
     private final JButton _generatePlaneButton = new JButton("Generate plane");
-    private final SettingInputPanel _cPanel = new SettingInputPanel("Sound speed [m/s]:", "340");
+    private final SettingInputPanel _cPanel = new SettingInputPanel("Speed of sound [m/s]:", "340");
+    private final SettingInputPanel _gPanel = new SettingInputPanel("Density of air [kg/m3]:", "1.2");
     private final SettingInputPanel _fPanel = new SettingInputPanel("Frequency [Hz]:", "100");
     private final JButton _solveButton = new JButton("Solve");
     private final ChooseList _chooseList = new ChooseList();
@@ -47,6 +48,7 @@ public class UIPanel extends JComponent implements ActionListener {
         _generatePlaneButton.setPreferredSize(new Dimension(_comp1.getPreferredSize().width, _BAR_HEIGHT));
         _comp1.add(_generatePlaneButton);
         _comp1.add(_cPanel);
+        _comp1.add(_gPanel);
         _comp1.add(_fPanel);
         _solveButton.addActionListener(this);
         _solveButton.setPreferredSize(new Dimension(_comp1.getPreferredSize().width, _BAR_HEIGHT));
@@ -61,6 +63,7 @@ public class UIPanel extends JComponent implements ActionListener {
         add(_comp1);
         add(_console);
         setVisible(true);
+        _console.display("Generate new plane to draw on.");
     }
 
     void setSolver(Solver solver) {
@@ -69,7 +72,7 @@ public class UIPanel extends JComponent implements ActionListener {
         _showButton.addActionListener(_drawer);
     }
 
-    ConsolePanel getConsole() {
+    public ConsolePanel getConsole() {
         return _console;
     }
 
@@ -88,6 +91,7 @@ public class UIPanel extends JComponent implements ActionListener {
 
     public SimulationSettings getSimulationSettings() {
         return new SimulationSettings(Double.parseDouble(_cPanel.getInput()),
+                Double.parseDouble(_gPanel.getInput()),
                 Double.parseDouble(_fPanel.getInput()),
                 Double.parseDouble(_tileXPanel.getInput()),
                 _chooseList.getDrawValueType());
