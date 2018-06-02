@@ -23,6 +23,8 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
     private boolean _ifValueDraw = false;
     private GradientPrinter _gradientPrinter = new GradientPrinter();
     private ValueBar _bar = new ValueBar(20, 50, 20, 400);
+    private double _minValue;
+    private double _maxValue;
 
     public DrawingSheet() {
         addMouseListener(this);
@@ -48,7 +50,7 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
                     }
                 }
             }
-           //_bar.print(g2d);
+           _bar.print(g2d, _minValue, _maxValue);
         } else {
             for (int j = 0; j < _NOTilesy; j++) {
                 for (int i = 0; i < _NOTilesx; i++) {
@@ -56,7 +58,6 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
                 }
             }
         }
-        _bar.print(g2d);
     }
 
     private void drawSubtile(Graphics2D g2d, int x, int y) {
@@ -188,6 +189,11 @@ public class DrawingSheet extends JPanel implements MouseListener, MouseMotionLi
 
     public void setValues(Matrix matrix, float subtileSize) {
         _gradientPrinter.initialize(matrix, subtileSize);
+    }
+
+    public void setMinMaxValues(double min, double max) {
+        _minValue = min;
+        _maxValue = max;
     }
 
     public int getNOTilesX() {

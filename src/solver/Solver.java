@@ -22,6 +22,8 @@ public class Solver {
     private double _alpha;
     private double _g;
     private double _z;
+    private double _minValue;
+    private double _maxValue;
 
     public Solver(DrawingSheet drawingSheet, ConsolePanel console) {
         _drawingSheet = drawingSheet;
@@ -373,24 +375,34 @@ public class Solver {
         _valueMatrix = new Matrix(_drawingSheet.getNOTilesX()*_r + 1, _drawingSheet.getNOTilesY()*_r + 1);
         int x = 0;
         int y = 0;
+        _minValue = 0;
+        _maxValue = 0;
+        double v;
         for (int i = 0; i < _n; i++) {
             switch (valueType) {
-                case RealPart: {
-                    _valueMatrix.set(x, y, _matrix.get(2*_n, 2*i));
+                case RealPartPa: {
+                    v = _matrix.get(2*_n, 2*i);
                     break;
                 }
-                case ImaginaryPart: {
-                    _valueMatrix.set(x, y, _matrix.get(2*_n, 2*i + 1));
+                case ImaginaryPartPa: {
+                    v = _matrix.get(2*_n, 2*i + 1);
                     break;
                 }
-                case AbsoluteValue: {
-                    _valueMatrix.set(x, y, Math.sqrt(Math.pow(_matrix.get(2*_n, 2*i), 2) +
-                            Math.pow(_matrix.get(2*_n, 2*i + 1), 2)));
+                case AbsoluteValuePa: {
+                    v = Math.sqrt(Math.pow(_matrix.get(2*_n, 2*i), 2) +
+                            Math.pow(_matrix.get(2*_n, 2*i + 1), 2));
                     break;
                 }
                 default: {
                     throw new IllegalValueError("Unsupported draw value type");
                 }
+            }
+            _valueMatrix.set(x, y, v);
+            if (v > _maxValue) {
+                _maxValue = v;
+            }
+            if (v < _minValue) {
+                _minValue = v;
             }
             x++;
             if (x == _valueMatrix.getSizeX()) {
@@ -398,11 +410,15 @@ public class Solver {
                 y++;
             }
         }
+        _drawingSheet.setMinMaxValues(_minValue, _maxValue);
         //_valueMatrix.print();
     }
 
     private void scaleValues() {
-        double max = _valueMatrix.getMaxAbsValue();
+        double max = Math.abs(_minValue);
+        if (max < Math.abs(_maxValue)) {
+            max = Math.abs(_maxValue);
+        }
         _valueMatrix.scale(1/max);
     }
 

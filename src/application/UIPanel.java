@@ -30,13 +30,13 @@ public class UIPanel extends JComponent implements ActionListener {
     private final JButton _solveButton = new JButton("Solve");
     private final ChooseList _chooseList = new ChooseList();
     private final JButton _showButton = new JButton("Show result");
-    private final ConsolePanel _console = new ConsolePanel(_NAME_LENGTH + _GAP_LENGTH + _INPUT_LENGTH, 800);
+    private final ConsolePanel _console = new ConsolePanel(_NAME_LENGTH + _GAP_LENGTH + 3*_INPUT_LENGTH, 800);
 
     UIPanel(Window window) {
-        _chooseList.add("Real part");
-        _chooseList.set(E_DrawValueType.RealPart);
-        _chooseList.add("Imaginary part");
-        _chooseList.add("Absolute value");
+        _chooseList.add("Real part [Pa]");
+        _chooseList.set(E_DrawValueType.RealPartPa);
+        _chooseList.add("Imaginary part [Pa]");
+        _chooseList.add("Absolute value [Pa]");
         JComponent _comp1 = new JPanel();
         _comp1.setPreferredSize(new Dimension(_NAME_LENGTH + _GAP_LENGTH + _INPUT_LENGTH, 800));
         _comp1.setLayout(new FlowLayout());

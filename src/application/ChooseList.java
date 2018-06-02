@@ -1,6 +1,7 @@
 package application;
 
 import drawing.E_DrawValueType;
+import drawing.IllegalValueError;
 
 import java.awt.*;
 import java.awt.event.ItemEvent;
@@ -16,12 +17,14 @@ public class ChooseList extends Choice implements ItemListener {
 
     @Override
     public void itemStateChanged(ItemEvent event) {
-        if (event.getItem() == "Real part") {
-            _drawValueType = E_DrawValueType.RealPart;
-        } else if (event.getItem() == "Imaginary part") {
-            _drawValueType = E_DrawValueType.ImaginaryPart;
+        if (event.getItem() == "Real part [Pa]") {
+            _drawValueType = E_DrawValueType.RealPartPa;
+        } else if (event.getItem() == "Imaginary part [Pa]") {
+            _drawValueType = E_DrawValueType.ImaginaryPartPa;
+        } else if (event.getItem() == "Absolute value [Pa]") {
+            _drawValueType = E_DrawValueType.AbsoluteValuePa;
         } else {
-            _drawValueType = E_DrawValueType.AbsoluteValue;
+            throw new IllegalValueError("Unknown draw value type!");
         }
     }
 

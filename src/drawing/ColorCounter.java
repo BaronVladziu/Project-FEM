@@ -11,8 +11,7 @@ public final class ColorCounter {
         int valueRange = 2;
         value *= valueRange;
         int rest = (int)(255*((value + valueRange) - ((int)(value + valueRange))));
-        System.out.println(Double.toString(value) + " --> " + Double.toString((value + valueRange) - ((int)(value + valueRange))));
-
+        //System.out.println(Double.toString(value) + " --> " + Double.toString((value + valueRange) - ((int)(value + valueRange))));
         if (value >= 0) {
             if (value >= 1) {
                 return new Color(255, 255-rest, 0);

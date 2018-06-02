@@ -9,8 +9,3 @@ class App {
     }
 
 }
-
-/*
-TODO:
- - value bar
-*/
