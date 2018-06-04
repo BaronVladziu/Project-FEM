@@ -64,6 +64,9 @@ public class UIPanel extends JComponent implements ActionListener {
         add(_console);
         setVisible(true);
         _console.display("Generate new plane to draw on.");
+        _console.display("Press A to draw air");
+        _console.display("Press S to draw source");
+        _console.display("Press W to draw walls");
     }
 
     void setSolver(Solver solver) {

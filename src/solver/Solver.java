@@ -410,7 +410,11 @@ public class Solver {
                 y++;
             }
         }
-        _drawingSheet.setMinMaxValues(_minValue, _maxValue);
+        if (Math.abs(_minValue) > Math.abs(_maxValue)) {
+            _drawingSheet.setMinMaxValues(_minValue, -_minValue);
+        } else {
+            _drawingSheet.setMinMaxValues(-_maxValue, _maxValue);
+        }
         //_valueMatrix.print();
     }
 
